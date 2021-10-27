@@ -22,7 +22,7 @@
 
 <a name="naming-conventions--foldersAndFiles"></a><a name="1.1"></a>
 
-- [1.1](#naming-conventions--foldersAndFiles) **Folders And Files:** Use Spinal Case or Kebab Case for naming Folders and Files.
+- [1.1](#naming-conventions--foldersAndFiles) **Folders And Files:** Use Spinal or Kebab Case for naming Folders and Files.
 
   - Bad:
 
@@ -254,51 +254,40 @@
   - _Functions_ must not exceed _40_ lines. Break function into _modules_ or _sub functions_.
   - Avoid _deep nesting_ of _functions_ and _if-else_ block.
 
-<a name="modularization--functions"></a><a name="5.1"></a>
+<a name="modularization--modulesAndFunctions"></a><a name="5.1"></a>
 
-- [5.1](#modularization--functions) **Modularizing Functions:**
+- [5.1](#modularization--modulesAndFunctions) **Modules and Modular Functions:**
 
   - Bad:
 
-  ```javascript
-  // Check User Loan Approval Status
-  const isLoanApproved = async (userName) => {
-    // Check if user is valid or not
-    let query = "SELECT COUNT(*) FROM users WHERE username = ?";
-    const queryResult = await mysql
-      .query(userName, [userName])
-      .then((result) => {
-        return result;
-      })
-      .catch((err) => {
-        return err;
-      });
+    - loan-check.js
 
-    if (queryResult instanceof Error) {
-      // Code Logic, if error occurred
-    } else {
-      const isValid = queryResult === 1 ? true : false;
+    ```javascript
+    // Check User Loan Approval Status
+    const isLoanApproved = async (userName) => {
+      // Check if user is valid or not
+      let query = "SELECT COUNT(*) FROM users WHERE username = ?";
+      const queryResult = await mysql
+        .query(userName, [userName])
+        .then((result) => {
+          return result;
+        })
+        .catch((err) => {
+          return err;
+        });
 
-      // If user is valid
-      if (isValid) {
-        // Get application number of the user
-        query = "SELECT application_number FROM userDetails WHERE username = ?";
-        const userApplicationNumber = await mysql
-          .query(query, [userName])
-          .then((result) => {
-            return result;
-          })
-          .catch((err) => {
-            return err;
-          });
+      if (queryResult instanceof Error) {
+        // Code Logic, if error occurred
+      } else {
+        const isValid = queryResult === 1 ? true : false;
 
-        if (userApplicationNumber instanceof Error) {
-          // Code Logic, if error occurred
-        } else {
-          // Check user loan status
-          query = "SELECT status FROM loanStatus WHERE application_number = ?";
-          const loanStatus = await mysql
-            .query(query, [userApplicationNumber])
+        // If user is valid
+        if (isValid) {
+          // Get application number of the user
+          query =
+            "SELECT application_number FROM userDetails WHERE username = ?";
+          const userApplicationNumber = await mysql
+            .query(query, [userName])
             .then((result) => {
               return result;
             })
@@ -306,76 +295,97 @@
               return err;
             });
 
-          if (loanStatus instanceof Error) {
+          if (userApplicationNumber instanceof Error) {
             // Code Logic, if error occurred
           } else {
-            return loanStatus;
+            // Check user loan status
+            query =
+              "SELECT status FROM loanStatus WHERE application_number = ?";
+            const loanStatus = await mysql
+              .query(query, [userApplicationNumber])
+              .then((result) => {
+                return result;
+              })
+              .catch((err) => {
+                return err;
+              });
+
+            if (loanStatus instanceof Error) {
+              // Code Logic, if error occurred
+            } else {
+              return loanStatus;
+            }
           }
+        } else {
+          // Code Logic, if user is not valid
         }
-      } else {
-        // Code Logic, if user is not valid
       }
-    }
-  };
-  ```
+    };
+    ```
 
   - Good:
 
-  ```javascript
-  // Check User Loan Approval Status
-  const isLoanApproved = async (userName) => {
-    const isValid = isUserValid(userName);
+    - loan-check.js
 
-    // If user is valid
-    if (isValid) {
-      const userApplicationNumber = await getApplicationNumber(userName);
-      const loanStatus = isLoanApproved(userApplicationNumber);
+    ```javascript
+    // Check User Loan Approval Status
+    const isLoanApproved = async (userName) => {
+      const isValid = isUserValid(userName);
+
+      // If user is valid
+      if (isValid) {
+        const userApplicationNumber = await getApplicationNumber(userName);
+        const loanStatus = isLoanApproved(userApplicationNumber);
+        return loanStatus;
+      } else {
+        // Code Logic, if user is not valid
+      }
+    };
+    ```
+
+    - user_module.js
+
+    ```javascript
+    // Check if user is valid or not
+    const isUserValid = async (userName) => {
+      let query = "SELECT COUNT(*) FROM users WHERE username = ?";
+      const queryResult = await mysql
+        .query(userName, [userName])
+        .then((result) => {
+          return result;
+        })
+        .catch((err) => {
+          // Code Logic, if error occurred
+        });
+      const isValid = queryResult === 1 ? true : false;
+      return isValid;
+    };
+
+    // Get application number of the user
+    const getApplicationNumber = (userName) => {
+      query = "SELECT application_number FROM userDetails WHERE username = ?";
+      const userApplicationNumber = await mysql
+        .query(query, [userName])
+        .then((result) => {
+          return result;
+        })
+        .catch((err) => {
+          // Code Logic, if error occurred
+        });
+      return userApplicationNumber;
+    };
+
+    // Check user loan status
+    const isLoanApproved = (userApplicationNumber) => {
+      query = "SELECT loan_status FROM loanStatus WHERE application_number = ?";
+      const loanStatus = await mysql
+        .query(query, [userApplicationNumber])
+        .then((result) => {
+          return result;
+        })
+        .catch((err) => {
+          // Code Logic, if error occurred
+        });
       return loanStatus;
-    } else {
-      // Code Logic, if user is not valid
-    }
-  };
-
-  // Check if user is valid or not
-  const isUserValid = async (userName) => {
-    let query = "SELECT COUNT(*) FROM users WHERE username = ?";
-    const queryResult = await mysql
-      .query(userName, [userName])
-      .then((result) => {
-        return result;
-      })
-      .catch((err) => {
-        // Code Logic, if error occurred
-      });
-    const isValid = queryResult === 1 ? true : false;
-    return isValid;
-  };
-
-  // Get application number of the user
-  const getApplicationNumber = (userName) => {
-    query = "SELECT application_number FROM userDetails WHERE username = ?";
-    const userApplicationNumber = await mysql
-      .query(query, [userName])
-      .then((result) => {
-        return result;
-      })
-      .catch((err) => {
-        // Code Logic, if error occurred
-      });
-    return userApplicationNumber;
-  };
-
-  // Check user loan status
-  const isLoanApproved = (userApplicationNumber) => {
-    query = "SELECT loan_status FROM loanStatus WHERE application_number = ?";
-    const loanStatus = await mysql
-      .query(query, [userApplicationNumber])
-      .then((result) => {
-        return result;
-      })
-      .catch((err) => {
-        // Code Logic, if error occurred
-      });
-    return loanStatus;
-  };
-  ```
+    };
+    ```
