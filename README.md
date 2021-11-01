@@ -9,6 +9,7 @@
 - [Modularization](#modularization)
 - [Code Formatting](#code-formatting)
 - [SQL Queries](#sql-queries)
+- [Routing](#routing)
 
 ## Naming Conventions
 
@@ -16,9 +17,9 @@
 
   - Use nouns for Class and type names.
   - Names for methods should contain a verb.
-  - If a method returns a value indicating whether something is true or not, then start the method name with “is”.
-  - If a method returns an object’s property, then start the name with “get”.
-  - If a method sets a property, then start with “set”.
+  - If a method returns a value indicating whether something is _true_ or _false_, then start the method name with _“is”_.
+  - If a method returns an object’s property, then start the name with _“get”_.
+  - If a method sets a property, then start with _“set”_.
   - Avoid use of single identifiers for multiple purposes.
   - Use of descriptive names that defines the usability itself.
 
@@ -84,7 +85,7 @@
 
 - [2.1](#response--valid) **Valid Response Structure:**
 
-  - Sample Response:
+  - Sample Valid Response:
 
   ```
   Status: 2XX
@@ -156,8 +157,8 @@
 
 - Important key points to be considered while dealing with sensitive configuration file or credentials and environment variables -
 
-  - _Do not hardcode_ any _config related parameters in code_. Always have a _config file_ and use data from the file.
-  - _Do not share_ or push your _config or credential key_ related files in Github repository or any other repository management system.
+  - Do not hardcode any _config_ related parameters in code. Always have a _config_ file and use data from the file.
+  - Do not share or push your _config_ or _credential key_ related files in GitHub repository or any other repository management system.
 
 <a name="configuration-and-environment-variables--handling"></a><a name="4.1"></a>
 
@@ -213,10 +214,10 @@
 
 - Important key points to be considered while modularizing the program and functions -
 
-  - _Line of code_ must not exceed more _200 - 250_, if exceeds break into subcomponents.
-  - _Functions_ must not exceed _40_ lines. Break function into _modules_ or _sub functions_.
-  - _Avoid deep nesting_. Too many nesting levels make code harder to read and follow.
-  - _Divide_ the program into several _sub-modules_ where each _sub-module_ contains something necessary to execute only _one aspect of the desired functionality_.
+  - Line of code must not exceed more _200 - 250_, if exceeds break into subcomponents.
+  - Functions must not exceed _40_ lines. Break function into modules or sub functions.
+  - Avoid deep nesting. Too many nesting levels make code harder to read and follow.
+  - Divide the program into several sub-modules where each sub-module contains something necessary to execute only one aspect of the desired functionality.
 
 <a name="modularization--modulesAndFunctions"></a><a name="5.1"></a>
 
@@ -370,7 +371,7 @@
 
   ```
   var x=4; var y=2;
-  function add(a,b){return a+b;}
+  const add=(a,b)=>{return a+b;}
   var result;
   result =add(x,y);
   ```
@@ -380,20 +381,20 @@
   ```javascript
   var x = 4;
   var y = 2;
-  function add(a, b) {
+  const add = (a, b) => {
     return a + b;
-  }
+  };
   var result;
   result = add(x, y);
   ```
 
 ## SQL Queries
 
-- Important key points when dealing with _Mysql queries_ -
+- Important key points when dealing with _SQL Queries_ -
 
   - SQL Query should not have _string formating_ or _string bindings_.
   - Use prepared statements in case of _Raw Query_.
-  - _Query Builder_ must constructed well to handle query conditions.
+  - Query Builder must constructed well to handle query conditions.
   - Avoid running queries within loops.
   - Construct bulk queries and have a single query execution.
 
@@ -429,3 +430,49 @@
     mysql.query(query, [studentsQueryParams]);
   };
   ```
+
+## Routing
+
+- Important key points -
+
+  - _Root URL_ must have proper message, to indicate the server is _active_.
+  - All invalid routes must be handled.
+
+<a name="routing--root"></a><a name="8.1"></a>
+
+- [8.1](#routing--root) **Root URL:**
+
+  - Sample Code:
+
+    - index.js
+
+    ```javascript
+    import { router } from "./routes";
+
+    // Register routes
+    app.use("/", router);
+    ```
+
+    - routes.js
+
+    ```javascript
+    import rootController from "./controllers/rootController";
+    const router = express.Router();
+
+    // Base URL route
+    router.get("/", rootController.rootURLhandler);
+
+    export { router };
+    ```
+
+    - rootController.js
+
+    ```javascript
+    // Root URL Handler
+    const rootURLHandler = (req, res, next) => {
+      const response = new Response(true, "SERVER IS ACTIVE");
+      res.status(200).send(response);
+    };
+
+    export { rootURLHandler };
+    ```
