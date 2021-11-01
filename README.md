@@ -8,6 +8,7 @@
 - [Configuration And Environment Variables](#configuration-and-environment-variables)
 - [Modularization](#modularization)
 - [Code Formatting](#code-formatting)
+- [SQL Queries](#sql-queries)
 
 ## Naming Conventions
 
@@ -356,7 +357,7 @@
 
 - The code always looks better when it is in a proper format. Important key points -
 
-  - Use appropriate single space before and after operators.
+  - Use appropriate single space before and after operators, variables and parameters.
   - Code must well formatted and tab structured according to the respective languages.
   - Plugin like _Prettier_, need to be used for formatting.
   - Use _ESLINT_ for JS applications.
@@ -384,4 +385,47 @@
   }
   var result;
   result = add(x, y);
+  ```
+
+## SQL Queries
+
+- Important key points when dealing with _Mysql queries_ -
+
+  - SQL Query should not have _string formating_ or _string bindings_.
+  - Use prepared statements in case of _Raw Query_.
+  - _Query Builder_ must constructed well to handle query conditions.
+  - Avoid running queries within loops.
+  - Construct bulk queries and have a single query execution.
+
+<a name="sql-queries--queryConstruction"></a><a name="7.1"></a>
+
+- [7.1](#sql-queries--queryConstruction) **Query Construction:**
+
+  - Bad:
+
+  ```javascript
+  const insertStudentRecord = (students) => {
+    let query = "INSERT INTO STUDENTS (NAME) VALUES ?";
+
+    // Insert individual record inside loop
+    for (let i = 0; i <= students.length; i++) {
+      mysql.query(query, [students[i]]);
+    }
+  };
+  ```
+
+  - Good:
+
+  ```javascript
+  const insertStudentRecord = (students) => {
+    let query = "INSERT INTO STUDENTS (NAME) VALUES ?";
+    let studentsQueryParams = [];
+
+    students.forEach((student) => {
+      studentsQueryParams.push([student]);
+    });
+
+    // Bulk Insert
+    mysql.query(query, [studentsQueryParams]);
+  };
   ```
