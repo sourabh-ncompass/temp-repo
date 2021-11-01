@@ -7,6 +7,7 @@
 - [Validation](#validation)
 - [Configuration And Environment Variables](#configuration-and-environment-variables)
 - [Modularization](#modularization)
+- [Code Formatting](#code-formatting)
 
 ## Naming Conventions
 
@@ -22,7 +23,7 @@
 
 <a name="naming-conventions--foldersAndFiles"></a><a name="1.1"></a>
 
-- [1.1](#naming-conventions--foldersAndFiles) **Folders And Files:** Use Spinal or Kebab Case for naming Folders and Files.
+- [1.1](#naming-conventions--foldersAndFiles) **Folders And Files:** Use Spinal Case or Kebab Case for naming Folders and Files.
 
   - Bad:
 
@@ -82,20 +83,7 @@
 
 - [2.1](#response--valid) **Valid Response Structure:**
 
-  - Bad:
-
-  ```
-  Status: 2XX
-  Headers:
-    Content-Type: *
-    Content-Encoding: *
-  Body:
-    {
-      "data": {}
-    }
-  ```
-
-  - Good:
+  - Sample Response:
 
   ```
   Status: 2XX
@@ -110,24 +98,11 @@
     }
   ```
 
-  <a name="response--error"></a><a name="2.2"></a>
+<a name="response--error"></a><a name="2.2"></a>
 
 - [2.2](#response--error) **Error Response Structure:**
 
-  - Bad:
-
-  ```
-  Status: XXX         // 4XX or 5XX
-  Headers:
-    Content-Type: *
-    Content-Encoding: *
-  Body:
-    {
-      "data": {}
-    }
-  ```
-
-  - Good:
+  - Sample Error Response:
 
   ```
   Status: XXX         // 4XX or 5XX
@@ -144,33 +119,15 @@
 
 ## Validation
 
+- Important key points -
+
+  - All Incoming Request Params must be validated.
+
 <a name="validation--functions"></a><a name="3.1"></a>
 
 - [3.1](#validation--functions) **Validation Functions:** The validation functions should return an object containing following keys: _isValid, message_. Here, _isValid_ is a boolean value that is _true_ if validation is successful and _false_ if it is unsuccessful whereas _message_ will contain the _error message_ in case of _unsuccessful_ validation.
 
-  - Bad:
-
-  ```javascript
-  const validationForExport = (body) => {
-    let isValid = true;
-    let message = "";
-
-    const schema = joi.object({
-      startDate: joi.date().iso().required(),
-    });
-
-    const validationResult = schema.validate(body);
-
-    if (validationResult.error) {
-      isValid = false;
-      message = validationResult.error.details[0].message;
-    }
-
-    return isValid;
-  };
-  ```
-
-  - Good:
+  - Sample Code:
 
   ```javascript
   const validationForExport = (body) => {
@@ -195,6 +152,11 @@
   ```
 
 ## Configuration And Environment Variables
+
+- Important key points to be considered while dealing with sensitive configuration file or credentials and environment variables -
+
+  - _Do not hardcode_ any _config related parameters in code_. Always have a _config file_ and use data from the file.
+  - _Do not share_ or push your _config or credential key_ related files in Github repository or any other repository management system.
 
 <a name="configuration-and-environment-variables--handling"></a><a name="4.1"></a>
 
@@ -248,11 +210,12 @@
 
 ## Modularization
 
-- Important key points to be considered while modularizing the program and functions.
+- Important key points to be considered while modularizing the program and functions -
 
   - _Line of code_ must not exceed more _200 - 250_, if exceeds break into subcomponents.
   - _Functions_ must not exceed _40_ lines. Break function into _modules_ or _sub functions_.
-  - Avoid _deep nesting_ of _functions_ and _if-else_ block.
+  - _Avoid deep nesting_. Too many nesting levels make code harder to read and follow.
+  - _Divide_ the program into several _sub-modules_ where each _sub-module_ contains something necessary to execute only _one aspect of the desired functionality_.
 
 <a name="modularization--modulesAndFunctions"></a><a name="5.1"></a>
 
@@ -332,18 +295,17 @@
     const isLoanApproved = async (userName) => {
       const isValid = isUserValid(userName);
 
-      // If user is valid
-      if (isValid) {
-        const userApplicationNumber = await getApplicationNumber(userName);
-        const loanStatus = isLoanApproved(userApplicationNumber);
-        return loanStatus;
-      } else {
-        // Code Logic, if user is not valid
+      // If user is not valid
+      if (!isValid) {
+        return;
       }
+      const userApplicationNumber = await getApplicationNumber(userName);
+      const loanStatus = isLoanApproved(userApplicationNumber);
+      return loanStatus;
     };
     ```
 
-    - user_module.js
+    - user-module.js
 
     ```javascript
     // Check if user is valid or not
@@ -389,3 +351,37 @@
       return loanStatus;
     };
     ```
+
+## Code Formatting
+
+- The code always looks better when it is in a proper format. Important key points -
+
+  - Use appropriate single space before and after operators.
+  - Code must well formatted and tab structured according to the respective languages.
+  - Plugin like _Prettier_, need to be used for formatting.
+  - Use _ESLINT_ for JS applications.
+
+<a name="code-formatting--program"></a><a name="6.1"></a>
+
+- [6.1](#code-formatting--program) **Javascript Code:**
+
+  - Bad:
+
+  ```
+  var x=4; var y=2;
+  function add(a,b){return a+b;}
+  var result;
+  result =add(x,y);
+  ```
+
+  - Good:
+
+  ```javascript
+  var x = 4;
+  var y = 2;
+  function add(a, b) {
+    return a + b;
+  }
+  var result;
+  result = add(x, y);
+  ```
